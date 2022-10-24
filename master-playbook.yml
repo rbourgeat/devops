@@ -43,8 +43,6 @@
       name: vagrant
       group: docker
 
-
-
   - name: Remove swapfile from /etc/fstab
     mount:
       name: "{{ item }}"
@@ -58,7 +56,7 @@
     command: swapoff -a
     when: ansible_swaptotal_mb > 0
 
-- name: Add an apt signing key for Kubernetes
+  - name: Add an apt signing key for Kubernetes
     apt_key:
       url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
       state: present
@@ -84,16 +82,25 @@
     lineinfile:
       path: /etc/default/kubelet
       line: KUBELET_EXTRA_ARGS=--node-ip={{ node_ip }}
+      create: yes
 
   - name: Restart kubelet
     service:
       name: kubelet
       daemon_reload: yes
       state: restarted
+  
+  - name: Remove config.toml
+    command: rm /etc/containerd/config.toml
+
+  - name: Restart containerd
+    service:
+      name: containerd
+      daemon_reload: yes
+      state: restarted
 
   - name: Initialize the Kubernetes cluster using kubeadm
-    command: kubeadm init --apiserver-advertise-address="192.168.50.10" --apise
-
+    command: kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address="192.168.50.10"
 
   - name: Setup kubeconfig for vagrant user
     command: "{{ item }}"
@@ -102,10 +109,9 @@
      - cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
      - chown vagrant:vagrant /home/vagrant/.kube/config
 
-
-  - name: Install calico pod network
+  - name: Deploying Flannel on Master Node
     become: false
-    command: kubectl create -f https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
+    command: kubectl create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
   - name: Generate join command
     command: kubeadm token create --print-join-command
@@ -114,6 +120,21 @@
   - name: Copy join command to local file
     local_action: copy content="{{ join_command.stdout_lines[0] }}" dest="./join-command"
 
+  - name: Copy wordpress folder
+    become: true 
+    copy:
+      src: ./wordpress
+      dest: /home/vagrant
+
+  - name: Delete master taint
+    command: kubectl taint node master node-role.kubernetes.io/control-plane:NoSchedule-
+    become: yes
+    become_user: vagrant
+
+  - name: Start Wordpress
+    command: kubectl apply -k /home/vagrant/wordpress
+    become: yes
+    become_user: vagrant
 
   handlers:
     - name: docker status
