@@ -15,3 +15,7 @@ Le `master-playbook.yml` va supprimer la **teinte** du noeud *master* pour dépl
 ## Environnement
 
 Ubuntu en local sur des VM.
+
+## Exemple
+
+<video src='./devops.mov'/>

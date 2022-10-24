@@ -136,6 +136,40 @@
     become: yes
     become_user: vagrant
 
+  # - name: Copy opensearch folder
+  #   become: true 
+  #   copy:
+  #     src: ./opensearch
+  #     dest: /home/vagrant
+  
+  # - name: Install helm
+  #   command: sudo snap install helm --classic
+  
+  # - name: Adding opensearch helm repo
+  #   command: helm repo add opensearch https://opensearch-project.github.io/helm-charts/
+  #   become: yes
+  #   become_user: vagrant
+  
+  # - name: Deploy opensearch/master
+  #   command: helm install opensearch-master opensearch/opensearch -f /home/vagrant/opensearch/master.yaml
+  #   become: yes
+  #   become_user: vagrant
+  
+  # - name: Deploy opensearch/data
+  #   command: helm install opensearch-data opensearch/opensearch -f /home/vagrant/opensearch/data.yaml
+  #   become: yes
+  #   become_user: vagrant
+  
+  # - name: Deploy opensearch/client
+  #   command: helm install opensearch-client opensearch/opensearch -f /home/vagrant/opensearch/client.yaml
+  #   become: yes
+  #   become_user: vagrant
+
+  # - name: Deploy opensearch Dashboard
+  #   command: helm install dashboards opensearch/opensearch-dashboards
+  #   become: yes
+  #   become_user: vagrant
+
   handlers:
     - name: docker status
       service: name=docker state=started

@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
     config.ssh.insert_key = false
 
     config.vm.provider "virtualbox" do |v|
-        v.memory = 2000 # kubeadm minimum is 1700
+        v.memory = 5000 # kubeadm minimum is 1700 and 
         v.cpus = 2
     end
 
